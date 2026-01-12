@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { supabase, Question, PersonalityType } from './lib/supabase';
+import { Question, PersonalityType } from './lib/supabase';
+import { localDb } from './lib/localDb';
 import StartScreen from './components/StartScreen';
 import TestScreen from './components/TestScreen';
 import ResultsScreen from './components/ResultsScreen';
@@ -34,9 +35,7 @@ function App() {
   }, []);
 
   const loadPersonalityTypes = async () => {
-    const { data } = await supabase
-      .from('personality_types')
-      .select('*');
+    const { data } = await localDb.getPersonalityTypes();
 
     if (data) {
       setPersonalityTypes(data);
@@ -50,22 +49,22 @@ function App() {
   const handleStart = async () => {
     setScreen('loading');
 
-    const { data: allQuestions } = await supabase
-      .from('questions')
-      .select('*');
+    const { data: allQuestions } = await localDb.getQuestions();
 
     if (allQuestions && allQuestions.length > 0) {
-      const shuffled = [...allQuestions].sort(() => Math.random() - 0.5);
+      // Duplicate questions to reach 50 if needed, or just use what we have
+      let pool = [...allQuestions];
+      while (pool.length < 50) {
+        pool = [...pool, ...allQuestions];
+      }
+
+      const shuffled = pool.sort(() => Math.random() - 0.5);
       const selected = shuffled.slice(0, 50);
 
       const token = generateSessionToken();
       setSessionToken(token);
 
-      const { data: session, error } = await supabase
-        .from('test_sessions')
-        .insert({ session_token: token })
-        .select()
-        .single();
+      const { data: session, error } = await localDb.createSession(token);
 
       if (session && !error) {
         setSessionId(session.id);
@@ -89,13 +88,7 @@ function App() {
 
     setAnswers(prev => [...prev, newAnswer]);
 
-    await supabase
-      .from('test_responses')
-      .insert({
-        session_id: sessionId,
-        question_id: questionId,
-        answer_value: value
-      });
+    await localDb.saveResponse(sessionId, questionId, value);
 
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(prev => prev + 1);
@@ -136,13 +129,10 @@ function App() {
 
     setResults(resultItems);
 
-    await supabase
-      .from('test_sessions')
-      .update({
-        completed_at: new Date().toISOString(),
-        results: resultItems
-      })
-      .eq('id', sessionId);
+    await localDb.updateSession(sessionId, {
+      completed_at: new Date().toISOString(),
+      results: resultItems as any
+    });
 
     setScreen('results');
   };

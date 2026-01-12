@@ -89,12 +89,38 @@ export default function ResultsScreen({ results, onRestart }: ResultsScreenProps
 
             <button
               onClick={() => {
-                if (navigator.share) {
-                  navigator.share({
-                    title: 'ကိုယ်ရည်ကိုယ်သွေး စစ်ဆေးမှု',
-                    text: 'ကျွန်တော်/မ ကိုယ်ရည်ကိုယ်သွေး စစ်ဆေးမှု လုပ်ပြီးပါပြီ။ သင်လည်း စမ်းကြည့်ပါ!',
-                  });
-                }
+                // Create text content for download
+                const date = new Date().toLocaleDateString('my-MM', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                });
+
+                let textContent = `ကိုယ်ရည်ကိုယ်သွေး စစ်ဆေးမှု ရလဒ်\n`;
+                textContent += `ရက်စွဲ: ${date}\n`;
+                textContent += `${'='.repeat(50)}\n\n`;
+
+                results.forEach((result, index) => {
+                  const percentage = ((result.score / result.maxScore) * 100).toFixed(1);
+                  textContent += `${index + 1}. ${categoryLabels[result.category] || result.category}\n`;
+                  textContent += `   အမျိုးအစား: ${result.name}\n`;
+                  textContent += `   ရမှတ်: ${result.score}/${result.maxScore} (${percentage}%)\n`;
+                  textContent += `   ရှင်းလင်းချက်: ${result.description}\n\n`;
+                });
+
+                textContent += `${'='.repeat(50)}\n`;
+                textContent += `ကျေးဇူးတင်ပါတယ်!`;
+
+                // Create blob and download
+                const blob = new Blob([textContent], { type: 'text/plain;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `personality-test-result-${Date.now()}.txt`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
               }}
               className="flex items-center justify-center gap-2 bg-gray-600 hover:bg-gray-700 text-white font-semibold px-8 py-4 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
             >
