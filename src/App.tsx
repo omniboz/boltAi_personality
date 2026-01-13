@@ -103,6 +103,7 @@ function App() {
     // User said "one click finish 50", implying very fast or automated.
     // Let's set a reasonable threshold. 50 questions * 2 seconds = 100 seconds.
     // Let's be generous and say 60 seconds.
+    /*
     const duration = Date.now() - startTime;
     if (duration < 60000) {
       alert('မေးခွန်းများကို သေချာဖတ်ပြီး ဖြေဆိုပေးပါ။ (Too fast)');
@@ -120,6 +121,7 @@ function App() {
         return;
       }
     }
+    */
 
     setScreen('loading');
 
