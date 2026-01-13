@@ -1,7 +1,7 @@
 import { Question, PersonalityType, TestSession, TestResponse } from './supabase';
 
 // Mock Data
-const MOCK_QUESTIONS: Question[] = [
+export const MOCK_QUESTIONS: Question[] = [
   {
     "id": "o1",
     "category": "openness",
@@ -2704,7 +2704,7 @@ const MOCK_QUESTIONS: Question[] = [
   }
 ];
 
-const MOCK_PERSONALITY_TYPES: PersonalityType[] = [
+export const MOCK_PERSONALITY_TYPES: PersonalityType[] = [
   // Extroversion
   {
     "id": "pt1",

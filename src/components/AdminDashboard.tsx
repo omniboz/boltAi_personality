@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ArrowLeft, Download, Trash2, Search } from 'lucide-react';
-import { localDb } from '../lib/localDb';
+import { supabaseDb } from '../lib/supabaseDb';
 import { TestSession } from '../lib/supabase';
 
 interface AdminDashboardProps {
@@ -15,8 +15,8 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
         loadData();
     }, []);
 
-    const loadData = () => {
-        const data = localDb.getSessions();
+    const loadData = async () => {
+        const data = await supabaseDb.getSessions();
         // Sort by date desc
         const sorted = data.sort((a, b) =>
             new Date(b.started_at).getTime() - new Date(a.started_at).getTime()
@@ -24,9 +24,9 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
         setSessions(sorted);
     };
 
-    const handleExport = () => {
-        const sessions = localDb.getSessions();
-        const responses = localDb.getResponses();
+    const handleExport = async () => {
+        const sessions = await supabaseDb.getSessions();
+        const responses = await supabaseDb.getResponses();
 
         const data = {
             sessions,
@@ -46,10 +46,11 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
     };
 
     const handleDelete = () => {
-        if (confirm('မှတ်တမ်းအားလုံးကို ဖျက်မည်မှာ သေချာပါသလား?')) {
-            localStorage.removeItem('test_sessions');
-            localStorage.removeItem('test_responses');
-            loadData();
+        if (confirm('မှတ်တမ်းအားလုံးကို ဖျက်မည်မှာ သေချာပါသလား? (Supabase တွင် ဖျက်ရန်မရသေးပါ)')) {
+            // localStorage.removeItem('test_sessions');
+            // localStorage.removeItem('test_responses');
+            // loadData();
+            alert('Supabase တွင် ဖျက်ရန်မရသေးပါ');
         }
     };
 

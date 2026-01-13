@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Question, PersonalityType } from './lib/supabase';
-import { localDb } from './lib/localDb';
+import { supabaseDb } from './lib/supabaseDb';
 import StartScreen from './components/StartScreen';
 import TestScreen from './components/TestScreen';
 import ResultsScreen from './components/ResultsScreen';
@@ -37,7 +37,7 @@ function App() {
   }, []);
 
   const loadPersonalityTypes = async () => {
-    const { data } = await localDb.getPersonalityTypes();
+    const { data } = await supabaseDb.getPersonalityTypes();
 
     if (data) {
       setPersonalityTypes(data);
@@ -53,7 +53,7 @@ function App() {
     setUserName(name);
     setStartTime(Date.now());
 
-    const { data: allQuestions } = await localDb.getQuestions();
+    const { data: allQuestions } = await supabaseDb.getQuestions();
 
     if (allQuestions && allQuestions.length > 0) {
       // Duplicate questions to reach 50 if needed, or just use what we have
@@ -67,7 +67,7 @@ function App() {
 
       const token = generateSessionToken();
 
-      const { data: session, error } = await localDb.createSession(token, name);
+      const { data: session, error } = await supabaseDb.createSession(token, name);
 
       if (session && !error) {
         setSessionId(session.id);
@@ -91,7 +91,7 @@ function App() {
 
     setAnswers(prev => [...prev, newAnswer]);
 
-    await localDb.saveResponse(sessionId, questionId, value);
+    await supabaseDb.saveResponse(sessionId, questionId, value);
 
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(prev => prev + 1);
@@ -156,7 +156,7 @@ function App() {
 
     setResults(resultItems);
 
-    await localDb.updateSession(sessionId, {
+    await supabaseDb.updateSession(sessionId, {
       completed_at: new Date().toISOString(),
       results: resultItems as any
     });
