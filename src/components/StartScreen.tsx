@@ -1,10 +1,22 @@
-import { Brain } from 'lucide-react';
+import { useState } from 'react';
+import { Brain, User } from 'lucide-react';
 
 interface StartScreenProps {
-  onStart: () => void;
+  onStart: (name: string) => void;
 }
 
 export default function StartScreen({ onStart }: StartScreenProps) {
+  const [name, setName] = useState('');
+  const [error, setError] = useState('');
+
+  const handleStart = () => {
+    if (!name.trim()) {
+      setError('ကျေးဇူးပြု၍ နာမည်ထည့်သွင်းပါ');
+      return;
+    }
+    onStart(name);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12 max-w-2xl w-full">
@@ -21,6 +33,31 @@ export default function StartScreen({ onStart }: StartScreenProps) {
             သင့်ရဲ့ကိုယ်ရည်ကိုယ်သွေးကို စစ်ဆေးပါမယ်။ မေးခွန်း ၅၀ ခု ကို ဖြေဆိုရမှာဖြစ်ပြီး
             အချိန် ၁၀ မိနစ်ခန့် ကြာမြင့်နိုင်ပါတယ်။
           </p>
+
+          <div className="w-full max-w-md mb-8">
+            <label htmlFor="name" className="block text-left text-sm font-medium text-gray-700 mb-2">
+              သင့်နာမည်
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <User className="h-5 w-5 text-gray-400" />
+              </div>
+              <input
+                type="text"
+                id="name"
+                className={`block w-full pl-10 pr-3 py-3 border ${error ? 'border-red-300 ring-red-200' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+                  } rounded-xl shadow-sm focus:outline-none focus:ring-2 transition-colors`}
+                placeholder="သင့်နာမည် ရိုက်ထည့်ပါ"
+                value={name}
+                onChange={(e) => {
+                  setName(e.target.value);
+                  setError('');
+                }}
+                onKeyDown={(e) => e.key === 'Enter' && handleStart()}
+              />
+            </div>
+            {error && <p className="mt-2 text-sm text-red-600 text-left">{error}</p>}
+          </div>
 
           <div className="bg-blue-50 rounded-2xl p-6 mb-8 w-full">
             <h3 className="font-semibold text-gray-900 mb-3 text-left">လမ်းညွှန်ချက်များ:</h3>
@@ -45,8 +82,8 @@ export default function StartScreen({ onStart }: StartScreenProps) {
           </div>
 
           <button
-            onClick={onStart}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-lg px-10 py-4 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+            onClick={handleStart}
+            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-lg px-10 py-4 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 w-full md:w-auto"
           >
             စတင်မည်
           </button>

@@ -11,9 +11,10 @@ interface ResultItem {
 interface ResultsScreenProps {
   results: ResultItem[];
   onRestart: () => void;
+  userName?: string;
 }
 
-export default function ResultsScreen({ results, onRestart }: ResultsScreenProps) {
+export default function ResultsScreen({ results, onRestart, userName }: ResultsScreenProps) {
   const categoryLabels: Record<string, string> = {
     extroversion: 'လူမှုဆက်ဆံရေး',
     agreeableness: 'သဘောကောင်းမှု',
@@ -32,7 +33,7 @@ export default function ResultsScreen({ results, onRestart }: ResultsScreenProps
             </div>
 
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-3">
-              သင့်ရဲ့ရလဒ်များ
+              {userName ? `${userName} ၏ ရလဒ်များ` : 'သင့်ရဲ့ရလဒ်များ'}
             </h1>
 
             <p className="text-lg text-gray-600">
@@ -97,6 +98,9 @@ export default function ResultsScreen({ results, onRestart }: ResultsScreenProps
                 });
 
                 let textContent = `ကိုယ်ရည်ကိုယ်သွေး စစ်ဆေးမှု ရလဒ်\n`;
+                if (userName) {
+                  textContent += `အမည်: ${userName}\n`;
+                }
                 textContent += `ရက်စွဲ: ${date}\n`;
                 textContent += `${'='.repeat(50)}\n\n`;
 

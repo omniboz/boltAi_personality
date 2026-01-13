@@ -25,6 +25,7 @@ export interface PersonalityType {
 export interface TestSession {
   id: string;
   session_token: string;
+  user_name?: string;
   started_at: string;
   completed_at?: string;
   results?: Record<string, unknown>;

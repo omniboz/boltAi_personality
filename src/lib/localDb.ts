@@ -2870,11 +2870,12 @@ class LocalDatabase {
     return { data: MOCK_QUESTIONS, error: null };
   }
 
-  async createSession(token: string) {
+  async createSession(token: string, userName?: string) {
     const sessions = this.getSessions();
     const newSession: TestSession = {
       id: Math.random().toString(36).substr(2, 9),
       session_token: token,
+      user_name: userName,
       started_at: new Date().toISOString()
     };
     sessions.push(newSession);

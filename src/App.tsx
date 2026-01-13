@@ -20,8 +20,9 @@ function App() {
   const [personalityTypes, setPersonalityTypes] = useState<PersonalityType[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Answer[]>([]);
-  const [sessionToken, setSessionToken] = useState('');
   const [sessionId, setSessionId] = useState('');
+  const [userName, setUserName] = useState('');
+  const [startTime, setStartTime] = useState<number>(0);
   const [results, setResults] = useState<Array<{
     category: string;
     name: string;
@@ -46,8 +47,10 @@ function App() {
     return Math.random().toString(36).substring(2) + Date.now().toString(36);
   };
 
-  const handleStart = async () => {
+  const handleStart = async (name: string) => {
     setScreen('loading');
+    setUserName(name);
+    setStartTime(Date.now());
 
     const { data: allQuestions } = await localDb.getQuestions();
 
@@ -62,9 +65,8 @@ function App() {
       const selected = shuffled.slice(0, 50);
 
       const token = generateSessionToken();
-      setSessionToken(token);
 
-      const { data: session, error } = await localDb.createSession(token);
+      const { data: session, error } = await localDb.createSession(token, name);
 
       if (session && !error) {
         setSessionId(session.id);
@@ -96,6 +98,28 @@ function App() {
   };
 
   const handleComplete = async () => {
+    // Rapid completion check (less than 30 seconds for 50 questions is impossible if reading)
+    // User said "one click finish 50", implying very fast or automated.
+    // Let's set a reasonable threshold. 50 questions * 2 seconds = 100 seconds.
+    // Let's be generous and say 60 seconds.
+    const duration = Date.now() - startTime;
+    if (duration < 60000) {
+      alert('မေးခွန်းများကို သေချာဖတ်ပြီး ဖြေဆိုပေးပါ။ (Too fast)');
+      handleRestart();
+      return;
+    }
+
+    // Variance check (all answers are the same)
+    if (answers.length > 0) {
+      const firstValue = answers[0].value;
+      const allSame = answers.every(a => a.value === firstValue);
+      if (allSame) {
+        alert('မေးခွန်းများကို သေချာဖတ်ပြီး ဖြေဆိုပေးပါ။ (All answers same)');
+        handleRestart();
+        return;
+      }
+    }
+
     setScreen('loading');
 
     const categoryScores: Record<string, number> = {};
@@ -142,9 +166,10 @@ function App() {
     setQuestions([]);
     setCurrentQuestionIndex(0);
     setAnswers([]);
-    setSessionToken('');
     setSessionId('');
     setResults([]);
+    setUserName('');
+    setStartTime(0);
   };
 
   if (screen === 'loading') {
@@ -174,7 +199,7 @@ function App() {
   }
 
   if (screen === 'results') {
-    return <ResultsScreen results={results} onRestart={handleRestart} />;
+    return <ResultsScreen results={results} onRestart={handleRestart} userName={userName} />;
   }
 
   return null;
