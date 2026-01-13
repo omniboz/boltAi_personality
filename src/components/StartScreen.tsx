@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Brain, User } from 'lucide-react';
+import { Brain, User, Download } from 'lucide-react';
+import { localDb } from '../lib/localDb';
 
 interface StartScreenProps {
   onStart: (name: string) => void;
@@ -8,6 +9,9 @@ interface StartScreenProps {
 export default function StartScreen({ onStart }: StartScreenProps) {
   const [name, setName] = useState('');
   const [error, setError] = useState('');
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [password, setPassword] = useState('');
+  const [passwordError, setPasswordError] = useState('');
 
   const handleStart = () => {
     if (!name.trim()) {
@@ -17,8 +21,81 @@ export default function StartScreen({ onStart }: StartScreenProps) {
     onStart(name);
   };
 
+  const handleExportClick = () => {
+    setShowPasswordModal(true);
+    setPassword('');
+    setPasswordError('');
+  };
+
+  const verifyPasswordAndExport = () => {
+    if (password === 'admin123') {
+      const sessions = localDb.getSessions();
+      const responses = localDb.getResponses();
+
+      const data = {
+        sessions,
+        responses,
+        exportDate: new Date().toISOString()
+      };
+
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `personality-test-data-${Date.now()}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      setShowPasswordModal(false);
+    } else {
+      setPasswordError('စကားဝှက်မှားယွင်းနေပါသည်');
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4 relative">
+      <button
+        onClick={handleExportClick}
+        className="absolute top-4 right-4 p-2 bg-white/50 hover:bg-white rounded-full transition-colors text-gray-600 hover:text-blue-600"
+        title="Export Data"
+      >
+        <Download className="w-6 h-6" />
+      </button>
+
+      {showPasswordModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl">
+            <h3 className="text-xl font-bold text-gray-900 mb-4">Admin Access</h3>
+            <input
+              type="password"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg mb-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && verifyPasswordAndExport()}
+              autoFocus
+            />
+            {passwordError && <p className="text-red-600 text-sm mb-4">{passwordError}</p>}
+            <div className="flex justify-end gap-2 mt-4">
+              <button
+                onClick={() => setShowPasswordModal(false)}
+                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={verifyPasswordAndExport}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              >
+                Export
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12 max-w-2xl w-full">
         <div className="flex flex-col items-center text-center">
           <div className="bg-blue-600 rounded-full p-6 mb-6">

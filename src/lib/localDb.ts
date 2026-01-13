@@ -2844,7 +2844,7 @@ const MOCK_PERSONALITY_TYPES: PersonalityType[] = [
 
 // Local Database Implementation
 class LocalDatabase {
-  private getSessions(): TestSession[] {
+  public getSessions(): TestSession[] {
     const sessions = localStorage.getItem('test_sessions');
     return sessions ? JSON.parse(sessions) : [];
   }
@@ -2853,7 +2853,7 @@ class LocalDatabase {
     localStorage.setItem('test_sessions', JSON.stringify(sessions));
   }
 
-  private getResponses(): TestResponse[] {
+  public getResponses(): TestResponse[] {
     const responses = localStorage.getItem('test_responses');
     return responses ? JSON.parse(responses) : [];
   }
