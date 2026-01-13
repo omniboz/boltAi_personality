@@ -1,12 +1,13 @@
 import { useState } from 'react';
-import { Brain, User, Download } from 'lucide-react';
-import { localDb } from '../lib/localDb';
+import { Brain, User } from 'lucide-react';
+
 
 interface StartScreenProps {
   onStart: (name: string) => void;
+  onAdminLogin: () => void;
 }
 
-export default function StartScreen({ onStart }: StartScreenProps) {
+export default function StartScreen({ onStart, onAdminLogin }: StartScreenProps) {
   const [name, setName] = useState('');
   const [error, setError] = useState('');
   const [showPasswordModal, setShowPasswordModal] = useState(false);
@@ -27,27 +28,9 @@ export default function StartScreen({ onStart }: StartScreenProps) {
     setPasswordError('');
   };
 
-  const verifyPasswordAndExport = () => {
+  const verifyPasswordAndLogin = () => {
     if (password === 'admin123') {
-      const sessions = localDb.getSessions();
-      const responses = localDb.getResponses();
-
-      const data = {
-        sessions,
-        responses,
-        exportDate: new Date().toISOString()
-      };
-
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `personality-test-data-${Date.now()}.json`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-
+      onAdminLogin();
       setShowPasswordModal(false);
     } else {
       setPasswordError('စကားဝှက်မှားယွင်းနေပါသည်');
@@ -59,9 +42,9 @@ export default function StartScreen({ onStart }: StartScreenProps) {
       <button
         onClick={handleExportClick}
         className="absolute top-4 right-4 p-2 bg-white/50 hover:bg-white rounded-full transition-colors text-gray-600 hover:text-blue-600"
-        title="Export Data"
+        title="Admin Access"
       >
-        <Download className="w-6 h-6" />
+        <User className="w-6 h-6" />
       </button>
 
       {showPasswordModal && (
@@ -74,7 +57,7 @@ export default function StartScreen({ onStart }: StartScreenProps) {
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && verifyPasswordAndExport()}
+              onKeyDown={(e) => e.key === 'Enter' && verifyPasswordAndLogin()}
               autoFocus
             />
             {passwordError && <p className="text-red-600 text-sm mb-4">{passwordError}</p>}
@@ -86,10 +69,10 @@ export default function StartScreen({ onStart }: StartScreenProps) {
                 Cancel
               </button>
               <button
-                onClick={verifyPasswordAndExport}
+                onClick={verifyPasswordAndLogin}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
               >
-                Export
+                Login
               </button>
             </div>
           </div>

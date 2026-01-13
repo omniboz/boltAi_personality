@@ -4,9 +4,10 @@ import { localDb } from './lib/localDb';
 import StartScreen from './components/StartScreen';
 import TestScreen from './components/TestScreen';
 import ResultsScreen from './components/ResultsScreen';
+import AdminDashboard from './components/AdminDashboard';
 import { Loader2 } from 'lucide-react';
 
-type Screen = 'start' | 'test' | 'results' | 'loading';
+type Screen = 'start' | 'test' | 'results' | 'loading' | 'admin';
 
 interface Answer {
   questionId: string;
@@ -184,7 +185,7 @@ function App() {
   }
 
   if (screen === 'start') {
-    return <StartScreen onStart={handleStart} />;
+    return <StartScreen onStart={handleStart} onAdminLogin={() => setScreen('admin')} />;
   }
 
   if (screen === 'test') {
@@ -200,6 +201,10 @@ function App() {
 
   if (screen === 'results') {
     return <ResultsScreen results={results} onRestart={handleRestart} userName={userName} />;
+  }
+
+  if (screen === 'admin') {
+    return <AdminDashboard onBack={() => setScreen('start')} />;
   }
 
   return null;
