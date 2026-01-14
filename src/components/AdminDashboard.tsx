@@ -107,6 +107,7 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
                                 <tr>
                                     <th className="px-6 py-4 font-semibold text-gray-700">အမည်</th>
                                     <th className="px-6 py-4 font-semibold text-gray-700">နေ့စွဲ</th>
+                                    <th className="px-6 py-4 font-semibold text-gray-700">သိမ်းဆည်းမှု</th>
                                     <th className="px-6 py-4 font-semibold text-gray-700">အခြေအနေ</th>
                                     <th className="px-6 py-4 font-semibold text-gray-700">ရလဒ်အကျဉ်း</th>
                                 </tr>
@@ -131,6 +132,17 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
                                             </td>
                                             <td className="px-6 py-4 text-gray-600">
                                                 {new Date(session.started_at).toLocaleString('my-MM')}
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                {session.id.startsWith('local-') ? (
+                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                                        Offline
+                                                    </span>
+                                                ) : (
+                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                        Online
+                                                    </span>
+                                                )}
                                             </td>
                                             <td className="px-6 py-4">
                                                 {session.completed_at ? (
