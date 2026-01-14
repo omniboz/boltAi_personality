@@ -26,9 +26,10 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
 
     const handleExport = async () => {
         const sessions = await supabaseDb.getSessions();
+        const responses = await supabaseDb.getResponses();
 
         // Define CSV headers
-        const headers = ['Name', 'Token', 'Date', 'Status', 'Source', 'Results'];
+        const headers = ['Name', 'Token', 'Date', 'Status', 'Source', 'Results', 'Description', 'Answers'];
 
         // Convert data to CSV rows
         const csvRows = sessions.map(session => {
@@ -36,11 +37,24 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
             const status = session.completed_at ? 'Completed' : 'In Progress';
             const source = session.id.startsWith('local-') ? 'Offline' : 'Online';
 
-            // Format results as a string "Category: Score/Max"
+            // Format results
             let resultsStr = '';
+            let descriptionStr = '';
+
             if (session.results && Array.isArray(session.results)) {
                 resultsStr = session.results.map((r: any) => `${r.category}: ${r.score}/${r.maxScore}`).join('; ');
+                // Get description from the first result
+                if (session.results.length > 0) {
+                    descriptionStr = (session.results[0] as any).description || '';
+                }
             }
+
+            // Format answers
+            const sessionResponses = responses.filter(r => r.session_id === session.id);
+            const answersStr = sessionResponses
+                .sort((a, b) => a.question_id.localeCompare(b.question_id))
+                .map(r => `${r.question_id}: ${r.answer_value}`)
+                .join('; ');
 
             // Escape quotes and handle commas in data
             const row = [
@@ -49,7 +63,9 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
                 `"${date}"`,
                 `"${status}"`,
                 `"${source}"`,
-                `"${resultsStr}"`
+                `"${resultsStr}"`,
+                `"${descriptionStr.replace(/"/g, '""')}"`,
+                `"${answersStr}"`
             ];
             return row.join(',');
         });
