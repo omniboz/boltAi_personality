@@ -26,19 +26,43 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
 
     const handleExport = async () => {
         const sessions = await supabaseDb.getSessions();
-        const responses = await supabaseDb.getResponses();
 
-        const data = {
-            sessions,
-            responses,
-            exportDate: new Date().toISOString()
-        };
+        // Define CSV headers
+        const headers = ['Name', 'Token', 'Date', 'Status', 'Source', 'Results'];
 
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        // Convert data to CSV rows
+        const csvRows = sessions.map(session => {
+            const date = new Date(session.started_at).toLocaleString('my-MM');
+            const status = session.completed_at ? 'Completed' : 'In Progress';
+            const source = session.id.startsWith('local-') ? 'Offline' : 'Online';
+
+            // Format results as a string "Category: Score/Max"
+            let resultsStr = '';
+            if (session.results && Array.isArray(session.results)) {
+                resultsStr = session.results.map((r: any) => `${r.category}: ${r.score}/${r.maxScore}`).join('; ');
+            }
+
+            // Escape quotes and handle commas in data
+            const row = [
+                `"${session.user_name || 'Unknown'}"`,
+                `"${session.session_token}"`,
+                `"${date}"`,
+                `"${status}"`,
+                `"${source}"`,
+                `"${resultsStr}"`
+            ];
+            return row.join(',');
+        });
+
+        // Combine headers and rows
+        const csvContent = [headers.join(','), ...csvRows].join('\n');
+
+        // Create download link
+        const blob = new Blob([`\uFEFF${csvContent}`], { type: 'text/csv;charset=utf-8;' }); // Add BOM for Excel
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `personality-test-data-${Date.now()}.json`;
+        link.download = `personality-test-data-${Date.now()}.csv`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
