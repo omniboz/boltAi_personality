@@ -57,13 +57,14 @@ function App() {
 
     if (allQuestions && allQuestions.length > 0) {
       // Duplicate questions to reach 50 if needed, or just use what we have
+      // let pool = [...allQuestions];
+      // while (pool.length < 50) {
+      //   pool = [...pool, ...allQuestions];
+      // }
       let pool = [...allQuestions];
-      while (pool.length < 50) {
-        pool = [...pool, ...allQuestions];
-      }
 
       const shuffled = pool.sort(() => Math.random() - 0.5);
-      const selected = shuffled.slice(0, 50);
+      const selected = shuffled.slice(0, 1); // Changed to 1 for testing
 
       const token = generateSessionToken();
 
