@@ -46,11 +46,11 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
     };
 
     const handleDelete = () => {
-        if (confirm('မှတ်တမ်းအားလုံးကို ဖျက်မည်မှာ သေချာပါသလား? (Supabase တွင် ဖျက်ရန်မရသေးပါ)')) {
-            // localStorage.removeItem('test_sessions');
-            // localStorage.removeItem('test_responses');
-            // loadData();
-            alert('Supabase တွင် ဖျက်ရန်မရသေးပါ');
+        if (confirm('မှတ်တမ်းအားလုံးကို ဖျက်မည်မှာ သေချာပါသလား? (Offline Data များအားလုံး ပျက်သွားပါမည်)')) {
+            localStorage.removeItem('offline_sessions');
+            localStorage.removeItem('offline_responses');
+            loadData();
+            alert('Offline မှတ်တမ်းများအားလုံး ဖျက်ပြီးပါပြီ');
         }
     };
 
