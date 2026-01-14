@@ -67,15 +67,23 @@ function App() {
 
       const token = generateSessionToken();
 
-      const { data: session, error } = await supabaseDb.createSession(token, name);
-
-      if (session && !error) {
-        setSessionId(session.id);
-        setQuestions(selected);
-        setCurrentQuestionIndex(0);
-        setAnswers([]);
-        setScreen('test');
+      try {
+        const { data: session, error } = await supabaseDb.createSession(token, name);
+        if (session && !error) {
+          setSessionId(session.id);
+        } else {
+          console.warn('Offline mode: Could not create session on server');
+          setSessionId(`offline-${Date.now()}`);
+        }
+      } catch (e) {
+        console.warn('Offline mode: Error creating session', e);
+        setSessionId(`offline-${Date.now()}`);
       }
+
+      setQuestions(selected);
+      setCurrentQuestionIndex(0);
+      setAnswers([]);
+      setScreen('test');
     }
   };
 
@@ -91,7 +99,10 @@ function App() {
 
     setAnswers(prev => [...prev, newAnswer]);
 
-    await supabaseDb.saveResponse(sessionId, questionId, value);
+    // Fire and forget save response
+    supabaseDb.saveResponse(sessionId, questionId, value).catch(err => {
+      console.warn('Offline mode: Could not save response', err);
+    });
 
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(prev => prev + 1);
@@ -156,9 +167,11 @@ function App() {
 
     setResults(resultItems);
 
-    await supabaseDb.updateSession(sessionId, {
+    supabaseDb.updateSession(sessionId, {
       completed_at: new Date().toISOString(),
       results: resultItems as any
+    }).catch(err => {
+      console.warn('Offline mode: Could not update session', err);
     });
 
     setScreen('results');
