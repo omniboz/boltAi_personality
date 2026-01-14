@@ -23,7 +23,7 @@ function App() {
   const [answers, setAnswers] = useState<Answer[]>([]);
   const [sessionId, setSessionId] = useState('');
   const [userName, setUserName] = useState('');
-  const [startTime, setStartTime] = useState<number>(0);
+
   const [results, setResults] = useState<Array<{
     category: string;
     name: string;
@@ -51,7 +51,7 @@ function App() {
   const handleStart = async (name: string) => {
     setScreen('loading');
     setUserName(name);
-    setStartTime(Date.now());
+
 
     const { data: allQuestions } = await supabaseDb.getQuestions();
 
@@ -185,7 +185,7 @@ function App() {
     setSessionId('');
     setResults([]);
     setUserName('');
-    setStartTime(0);
+
   };
 
   if (screen === 'loading') {
