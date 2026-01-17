@@ -26,11 +26,11 @@ export default function TestScreen({ questions, onAnswer, onComplete, currentQue
   };
 
   const options = [
-    { value: 1, label: 'လုံးဝမတူညီပါ', color: 'bg-red-500 hover:bg-red-600' },
-    { value: 2, label: 'မတူညီပါ', color: 'bg-orange-400 hover:bg-orange-500' },
-    { value: 3, label: 'အလယ်အလတ်', color: 'bg-yellow-400 hover:bg-yellow-500' },
-    { value: 4, label: 'တူညီပါတယ်', color: 'bg-lime-500 hover:bg-lime-600' },
-    { value: 5, label: 'လုံးဝတူညီပါတယ်', color: 'bg-green-500 hover:bg-green-600' }
+    { value: 1, label: 'လုံးဝမတူညီပါ', color: 'from-red-500 to-red-600' },
+    { value: 2, label: 'မတူညီပါ', color: 'from-orange-400 to-orange-500' },
+    { value: 3, label: 'အလယ်အလတ်', color: 'from-yellow-400 to-yellow-500' },
+    { value: 4, label: 'တူညီပါတယ်', color: 'from-lime-500 to-lime-600' },
+    { value: 5, label: 'လုံးဝတူညီပါတယ်', color: 'from-green-500 to-green-600' }
   ];
 
   return (
@@ -59,30 +59,49 @@ export default function TestScreen({ questions, onAnswer, onComplete, currentQue
           </h2>
         </div>
 
-        <div className="space-y-3 mb-8">
+        {/* Circle Options */}
+        <div className="flex justify-center items-center gap-4 md:gap-6 mb-8">
           {options.map((option) => (
             <button
               key={option.value}
               onClick={() => setSelectedValue(option.value)}
-              className={`w-full p-4 rounded-xl font-medium text-white transition-all duration-200 transform ${
-                selectedValue === option.value
-                  ? `${option.color} scale-105 shadow-lg ring-4 ring-opacity-50 ring-blue-300`
-                  : `${option.color} opacity-90 hover:opacity-100 hover:scale-102 shadow-md`
-              }`}
+              className="relative group"
+              title={option.label}
             >
-              {option.label}
+              <div className={`
+                w-14 h-14 md:w-16 md:h-16 rounded-full 
+                bg-gradient-to-br ${option.color}
+                flex items-center justify-center
+                transition-all duration-300
+                ${selectedValue === option.value
+                  ? 'scale-125 shadow-2xl ring-4 ring-blue-400 ring-opacity-50'
+                  : 'scale-100 shadow-lg hover:scale-110 opacity-80 hover:opacity-100'
+                }
+              `}>
+              </div>
+              {/* Label below circle */}
+              <div className={`
+                absolute -bottom-8 left-1/2 transform -translate-x-1/2 
+                text-xs text-center whitespace-nowrap
+                transition-opacity duration-200
+                ${selectedValue === option.value ? 'opacity-100 font-semibold text-blue-600' : 'opacity-60 text-gray-600'}
+              `}>
+                {option.label}
+              </div>
             </button>
           ))}
         </div>
 
+        {/* Extra spacing for labels */}
+        <div className="h-10"></div>
+
         <button
           onClick={handleNext}
           disabled={selectedValue === null}
-          className={`w-full py-4 rounded-xl font-semibold text-lg transition-all duration-200 ${
-            selectedValue === null
-              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              : 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5'
-          }`}
+          className={`w-full py-4 rounded-xl font-semibold text-lg transition-all duration-200 ${selectedValue === null
+            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+            : 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5'
+            }`}
         >
           {currentQuestionIndex === questions.length - 1 ? 'ပြီးဆုံးမည်' : 'နောက်တစ်ခု'}
         </button>

@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { Brain, User } from 'lucide-react';
-
+import { User, CheckCircle, Clock, Target, Sparkles } from 'lucide-react';
 
 interface StartScreenProps {
   onStart: (name: string) => void;
@@ -38,39 +37,50 @@ export default function StartScreen({ onStart, onAdminLogin }: StartScreenProps)
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4 relative">
+    <div className="h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-amber-900 relative overflow-hidden flex items-center justify-center">
+      {/* Decorative Pattern Overlay */}
+      <div className="absolute inset-0 opacity-10">
+        <div className="absolute top-20 left-20 w-96 h-96 bg-amber-400 rounded-full mix-blend-overlay filter blur-3xl animate-blob"></div>
+        <div className="absolute top-40 right-20 w-96 h-96 bg-purple-400 rounded-full mix-blend-overlay filter blur-3xl animate-blob animation-delay-2000"></div>
+        <div className="absolute -bottom-8 left-40 w-96 h-96 bg-pink-400 rounded-full mix-blend-overlay filter blur-3xl animate-blob animation-delay-4000"></div>
+      </div>
+
+      {/* Admin Button */}
       <button
         onClick={handleExportClick}
-        className="absolute top-4 right-4 p-2 bg-white/50 hover:bg-white rounded-full transition-colors text-gray-600 hover:text-blue-600"
+        className="absolute top-6 right-6 p-3 bg-amber-500/30 backdrop-blur-md hover:bg-amber-500/40 rounded-full transition-all text-amber-100 hover:scale-110 shadow-lg z-10 border border-amber-400/30"
         title="Admin Access"
       >
         <User className="w-6 h-6" />
       </button>
 
+      {/* Password Modal */}
       {showPasswordModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">Admin Access</h3>
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-gradient-to-br from-purple-900 to-amber-900 rounded-3xl p-8 w-full max-w-md shadow-2xl transform transition-all border border-amber-400/30">
+            <h3 className="text-2xl font-bold bg-gradient-to-r from-amber-300 to-amber-100 bg-clip-text text-transparent mb-6">
+              Admin Access
+            </h3>
             <input
               type="password"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg mb-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              placeholder="Password"
+              className="w-full px-4 py-3 bg-purple-800/50 border-2 border-amber-400/30 text-amber-100 placeholder-amber-300/50 rounded-xl mb-2 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 focus:outline-none transition-all"
+              placeholder="Enter password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && verifyPasswordAndLogin()}
               autoFocus
             />
-            {passwordError && <p className="text-red-600 text-sm mb-4">{passwordError}</p>}
-            <div className="flex justify-end gap-2 mt-4">
+            {passwordError && <p className="text-red-300 text-sm mb-4">{passwordError}</p>}
+            <div className="flex justify-end gap-3 mt-6">
               <button
                 onClick={() => setShowPasswordModal(false)}
-                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+                className="px-6 py-2.5 text-amber-200 hover:bg-purple-800/50 rounded-xl transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={verifyPasswordAndLogin}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-purple-900 font-semibold rounded-xl hover:from-amber-400 hover:to-amber-500 shadow-lg hover:shadow-xl transition-all"
               >
                 Login
               </button>
@@ -79,76 +89,130 @@ export default function StartScreen({ onStart, onAdminLogin }: StartScreenProps)
         </div>
       )}
 
-      <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12 max-w-2xl w-full">
-        <div className="flex flex-col items-center text-center">
-          <div className="bg-blue-600 rounded-full p-6 mb-6">
-            <Brain className="w-16 h-16 text-white" />
-          </div>
-
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            ကိုယ်ရည်ကိုယ်သွေး စစ်ဆေးမှု
-          </h1>
-
-          <p className="text-lg text-gray-600 mb-8 leading-relaxed">
-            သင့်ရဲ့ကိုယ်ရည်ကိုယ်သွေးကို စစ်ဆေးပါမယ်။ မေးခွန်း ၅၀ ခု ကို ဖြေဆိုရမှာဖြစ်ပြီး
-            အချိန် ၁၀ မိနစ်ခန့် ကြာမြင့်နိုင်ပါတယ်။
-          </p>
-
-          <div className="w-full max-w-md mb-8">
-            <label htmlFor="name" className="block text-left text-sm font-medium text-gray-700 mb-2">
-              သင့်နာမည်
-            </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <User className="h-5 w-5 text-gray-400" />
+      {/* Main Content */}
+      <div className="relative w-full max-w-5xl px-4">
+        <div className="bg-purple-900/40 backdrop-blur-2xl rounded-3xl shadow-2xl p-6 md:p-8 border border-amber-400/20">
+          <div className="flex flex-col items-center text-center">
+            {/* Custom Brain Icon */}
+            <div className="relative mb-4">
+              <div className="absolute inset-0 bg-gradient-to-r from-amber-400 to-purple-400 rounded-full blur-2xl opacity-60 animate-pulse"></div>
+              <div className="relative">
+                <img
+                  src="/brain-icon.png"
+                  alt="Brain Icon"
+                  className="w-24 h-24 md:w-32 md:h-32 drop-shadow-2xl"
+                />
               </div>
-              <input
-                type="text"
-                id="name"
-                className={`block w-full pl-10 pr-3 py-3 border ${error ? 'border-red-300 ring-red-200' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
-                  } rounded-xl shadow-sm focus:outline-none focus:ring-2 transition-colors`}
-                placeholder="သင့်နာမည် ရိုက်ထည့်ပါ"
-                value={name}
-                onChange={(e) => {
-                  setName(e.target.value);
-                  setError('');
-                }}
-                onKeyDown={(e) => e.key === 'Enter' && handleStart()}
-              />
             </div>
-            {error && <p className="mt-2 text-sm text-red-600 text-left">{error}</p>}
-          </div>
 
-          <div className="bg-blue-50 rounded-2xl p-6 mb-8 w-full">
-            <h3 className="font-semibold text-gray-900 mb-3 text-left">လမ်းညွှန်ချက်များ:</h3>
-            <ul className="text-left text-gray-700 space-y-2">
-              <li className="flex items-start">
-                <span className="text-blue-600 font-bold mr-2">•</span>
-                <span>မေးခွန်းတစ်ခုချင်းစီကို သေချာစွာဖတ်ပြီး ဖြေဆိုပါ</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-blue-600 font-bold mr-2">•</span>
-                <span>သင့်အမှန်တကယ်ခံစားချက်အတိုင်း ဖြေဆိုပါ</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-blue-600 font-bold mr-2">•</span>
-                <span>မေးခွန်းများကို ကျော်သွားလို့မရပါ</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-blue-600 font-bold mr-2">•</span>
-                <span>သင့်ရဲ့ပထမဆုံး ခံစားချက်ကို ယုံကြည်ပါ</span>
-              </li>
-            </ul>
-          </div>
+            {/* Title - Single Line */}
+            <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-amber-300 via-amber-200 to-amber-100 bg-clip-text text-transparent mb-3 drop-shadow-lg whitespace-nowrap py-2" style={{ lineHeight: '1.4' }}>
+              ကိုယ်ရည်ကိုယ်သွေး စစ်ဆေးမှု
+            </h1>
 
-          <button
-            onClick={handleStart}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-lg px-10 py-4 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 w-full md:w-auto"
-          >
-            စတင်မည်
-          </button>
+            <p className="text-base md:text-lg text-amber-100/90 mb-6 leading-relaxed max-w-2xl drop-shadow">
+              သင့်ရဲ့ကိုယ်ရည်ကိုယ်သွေးကို စစ်ဆေးပါမယ်။ မေးခွန်း ၅၀ ခု • အချိန် ၁၀ မိနစ်ခန့်
+            </p>
+
+            {/* Name Input */}
+            <div className="w-full max-w-md mb-6">
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <User className="h-5 w-5 text-amber-300" />
+                </div>
+                <input
+                  type="text"
+                  id="name"
+                  className={`block w-full pl-12 pr-4 py-3 bg-purple-800/40 backdrop-blur-md border-2 ${error ? 'border-red-400' : 'border-amber-400/30'
+                    } text-amber-100 placeholder-amber-300/60 rounded-2xl shadow-lg focus:outline-none focus:ring-2 focus:ring-amber-400/50 focus:border-amber-400/50 transition-all`}
+                  placeholder="သင့်နာမည် ရိုက်ထည့်ပါ"
+                  value={name}
+                  onChange={(e) => {
+                    setName(e.target.value);
+                    setError('');
+                  }}
+                  onKeyDown={(e) => e.key === 'Enter' && handleStart()}
+                  autoFocus
+                />
+              </div>
+              {error && <p className="mt-2 text-sm text-red-300 text-left drop-shadow">{error}</p>}
+            </div>
+
+            {/* Instructions Grid - Compact */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6 w-full max-w-4xl">
+              <div className="bg-purple-800/30 backdrop-blur-md rounded-xl p-3 border border-amber-400/20 hover:bg-purple-800/40 transition-all">
+                <div className="flex flex-col items-center gap-2">
+                  <div className="bg-amber-500/30 rounded-lg p-2">
+                    <CheckCircle className="w-5 h-5 text-amber-200" />
+                  </div>
+                  <p className="text-xs text-amber-100/90 font-medium">သေချာစွာ ဖတ်ပါ</p>
+                </div>
+              </div>
+
+              <div className="bg-purple-800/30 backdrop-blur-md rounded-xl p-3 border border-amber-400/20 hover:bg-purple-800/40 transition-all">
+                <div className="flex flex-col items-center gap-2">
+                  <div className="bg-amber-500/30 rounded-lg p-2">
+                    <Sparkles className="w-5 h-5 text-amber-200" />
+                  </div>
+                  <p className="text-xs text-amber-100/90 font-medium">ရိုးသားစွာ ဖြေပါ</p>
+                </div>
+              </div>
+
+              <div className="bg-purple-800/30 backdrop-blur-md rounded-xl p-3 border border-amber-400/20 hover:bg-purple-800/40 transition-all">
+                <div className="flex flex-col items-center gap-2">
+                  <div className="bg-amber-500/30 rounded-lg p-2">
+                    <Target className="w-5 h-5 text-amber-200" />
+                  </div>
+                  <p className="text-xs text-amber-100/90 font-medium">ကျော်မသွားပါနဲ့</p>
+                </div>
+              </div>
+
+              <div className="bg-purple-800/30 backdrop-blur-md rounded-xl p-3 border border-amber-400/20 hover:bg-purple-800/40 transition-all">
+                <div className="flex flex-col items-center gap-2">
+                  <div className="bg-amber-500/30 rounded-lg p-2">
+                    <Clock className="w-5 h-5 text-amber-200" />
+                  </div>
+                  <p className="text-xs text-amber-100/90 font-medium">ပထမဆုံး ခံစားချက်</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Start Button */}
+            <button
+              onClick={handleStart}
+              disabled={!name.trim()}
+              className={`
+                px-10 py-4 rounded-2xl font-bold text-lg transition-all duration-300 shadow-2xl
+                ${name.trim()
+                  ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-purple-900 hover:from-amber-400 hover:to-amber-500 hover:scale-105 hover:shadow-3xl cursor-pointer'
+                  : 'bg-purple-800/30 text-amber-300/50 cursor-not-allowed border border-amber-400/20'
+                }
+              `}
+            >
+              စတင်မည်
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* Custom Animations */}
+      <style>{`
+        @keyframes blob {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          25% { transform: translate(20px, -50px) scale(1.1); }
+          50% { transform: translate(-20px, 20px) scale(0.9); }
+          75% { transform: translate(50px, 50px) scale(1.05); }
+        }
+        .animate-blob {
+          animation: blob 7s infinite;
+        }
+        .animation-delay-2000 {
+          animation-delay: 2s;
+        }
+        .animation-delay-4000 {
+          animation-delay: 4s;
+        }
+      `}</style>
     </div>
   );
 }

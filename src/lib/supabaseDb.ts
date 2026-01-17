@@ -58,13 +58,94 @@ class SupabaseDatabase {
     }
 
     async getPersonalityTypes() {
-        // Keeping static data for now to reduce DB calls
+        // Try fetching from Supabase first
+        const { data, error } = await supabase
+            .from('personality_types')
+            .select('*')
+            .order('category', { ascending: true });
+
+        if (!error && data && data.length > 0) {
+            return { data, error: null };
+        }
+
+        // Fallback to mock data if Supabase fails
+        console.warn('Using mock personality types (offline mode)');
         return { data: MOCK_PERSONALITY_TYPES, error: null };
     }
 
     async getQuestions() {
-        // Keeping static data for now
+        // Try fetching from Supabase first
+        const { data, error } = await supabase
+            .from('questions')
+            .select('*')
+            .order('category', { ascending: true });
+
+        if (!error && data && data.length > 0) {
+            return { data, error: null };
+        }
+
+        // Fallback to mock data if Supabase fails
+        console.warn('Using mock questions (offline mode)');
         return { data: MOCK_QUESTIONS, error: null };
+    }
+
+    async getMBTITypes() {
+        // Fetch MBTI types from database
+        const { data, error } = await supabase
+            .from('mbti_types')
+            .select('*')
+            .order('type_code', { ascending: true });
+
+        if (!error && data && data.length > 0) {
+            return { data, error: null };
+        }
+
+        console.warn('No MBTI types found in database');
+        return { data: [], error };
+    }
+
+    async getStratifiedQuestions() {
+        // Fetch all questions with MBTI categorization
+        const { data: allQuestions, error } = await supabase
+            .from('questions')
+            .select('*')
+            .not('mbti_axis', 'is', null)
+            .eq('is_active', true);
+
+        if (error || !allQuestions || allQuestions.length === 0) {
+            console.warn('No MBTI questions found, falling back to random selection');
+            return this.getQuestions();
+        }
+
+        // Stratified sampling: 12 EI, 13 SN, 12 TF, 13 JP
+        const questionsPerAxis = {
+            'EI': 12,
+            'SN': 13,
+            'TF': 12,
+            'JP': 13
+        };
+
+        const selectedQuestions: any[] = [];
+
+        for (const [axis, count] of Object.entries(questionsPerAxis)) {
+            // Filter questions for this axis
+            const axisQuestions = allQuestions.filter(q => q.mbti_axis === axis);
+
+            if (axisQuestions.length < count) {
+                console.warn(`Not enough questions for axis ${axis}. Need ${count}, have ${axisQuestions.length}`);
+                // Take all available
+                selectedQuestions.push(...axisQuestions);
+            } else {
+                // Randomly select required number
+                const shuffled = axisQuestions.sort(() => Math.random() - 0.5);
+                selectedQuestions.push(...shuffled.slice(0, count));
+            }
+        }
+
+        // Shuffle final array to mix axes
+        const finalQuestions = selectedQuestions.sort(() => Math.random() - 0.5);
+
+        return { data: finalQuestions, error: null };
     }
 
     async createSession(token: string, userName?: string) {

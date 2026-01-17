@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Question, PersonalityType } from './lib/supabase';
+import { Question, PersonalityType, MBTIType } from './lib/supabase';
 import { supabaseDb } from './lib/supabaseDb';
+import { calculateMBTIResult, formatMBTIPercentages } from './lib/mbtiScoring';
 import StartScreen from './components/StartScreen';
 import TestScreen from './components/TestScreen';
 import ResultsScreen from './components/ResultsScreen';
@@ -52,19 +53,10 @@ function App() {
     setScreen('loading');
     setUserName(name);
 
-
-    const { data: allQuestions } = await supabaseDb.getQuestions();
+    // Use stratified sampling for MBTI questions
+    const { data: allQuestions } = await supabaseDb.getStratifiedQuestions();
 
     if (allQuestions && allQuestions.length > 0) {
-      // Duplicate questions to reach 50 if needed, or just use what we have
-      let pool = [...allQuestions];
-      while (pool.length < 50) {
-        pool = [...pool, ...allQuestions];
-      }
-
-      const shuffled = pool.sort(() => Math.random() - 0.5);
-      const selected = shuffled.slice(0, 50);
-
       const token = generateSessionToken();
 
       try {
@@ -80,7 +72,7 @@ function App() {
         setSessionId(`offline-${Date.now()}`);
       }
 
-      setQuestions(selected);
+      setQuestions(allQuestions);
       setCurrentQuestionIndex(0);
       setAnswers([]);
       setScreen('test');
@@ -110,66 +102,44 @@ function App() {
   };
 
   const handleComplete = async () => {
-    // Rapid completion check (less than 30 seconds for 50 questions is impossible if reading)
-    // User said "one click finish 50", implying very fast or automated.
-    // Let's set a reasonable threshold. 50 questions * 2 seconds = 100 seconds.
-    // Let's be generous and say 60 seconds.
-    /*
-    const duration = Date.now() - startTime;
-    if (duration < 60000) {
-      alert('မေးခွန်းများကို သေချာဖတ်ပြီး ဖြေဆိုပေးပါ။ (Too fast)');
-      handleRestart();
-      return;
-    }
-
-    // Variance check (all answers are the same)
-    if (answers.length > 0) {
-      const firstValue = answers[0].value;
-      const allSame = answers.every(a => a.value === firstValue);
-      if (allSame) {
-        alert('မေးခွန်းများကို သေချာဖတ်ပြီး ဖြေဆိုပေးပါ။ (All answers same)');
-        handleRestart();
-        return;
-      }
-    }
-    */
-
     setScreen('loading');
 
-    const categoryScores: Record<string, number> = {};
-    const categoryCounts: Record<string, number> = {};
+    // Calculate MBTI scores
+    const responses = answers.map(answer => ({
+      question_id: answer.questionId,
+      answer_value: answer.value
+    }));
 
-    answers.forEach(answer => {
-      if (!categoryScores[answer.category]) {
-        categoryScores[answer.category] = 0;
-        categoryCounts[answer.category] = 0;
+    const mbtiResult = calculateMBTIResult(responses, questions);
+
+    // Fetch MBTI type data
+    const { data: mbtiTypes } = await supabaseDb.getMBTITypes();
+    const matchingType = mbtiTypes?.find(t => t.type_code === mbtiResult.type);
+
+    // Create result items for display
+    const resultItems = [
+      {
+        category: 'mbti_type',
+        name: matchingType?.name_mm || mbtiResult.type,
+        description: matchingType?.description_mm || '',
+        score: 0,
+        maxScore: 0,
+        mbtiType: mbtiResult.type,
+        mbtiScores: mbtiResult.scores,
+        mbtiPercentages: mbtiResult.percentages,
+        typeData: matchingType
       }
-      categoryScores[answer.category] += answer.value;
-      categoryCounts[answer.category] += 1;
-    });
+    ];
 
-    const resultItems = Object.keys(categoryScores).map(category => {
-      const score = categoryScores[category];
-      const maxScore = categoryCounts[category] * 5;
+    setResults(resultItems as any);
 
-      const matchingType = personalityTypes
-        .filter(pt => pt.category === category)
-        .find(pt => score >= pt.min_score && score <= pt.max_score);
-
-      return {
-        category,
-        name: matchingType?.name || 'အမျိုးအစားသတ်မှတ်မရပါ',
-        description: matchingType?.description || '',
-        score,
-        maxScore
-      };
-    });
-
-    setResults(resultItems);
-
+    // Update session with MBTI data
     supabaseDb.updateSession(sessionId, {
       completed_at: new Date().toISOString(),
-      results: resultItems as any
+      results: resultItems as any,
+      mbti_scores: mbtiResult.scores,
+      mbti_type: mbtiResult.type,
+      mbti_percentages: mbtiResult.percentages
     }).catch(err => {
       console.warn('Offline mode: Could not update session', err);
     });
