@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { User, CheckCircle, Clock, Target, Sparkles } from 'lucide-react';
+import brainIcon from '../assets/brain-icon.png';
 
 interface StartScreenProps {
   onStart: (name: string) => void;
@@ -98,7 +99,7 @@ export default function StartScreen({ onStart, onAdminLogin }: StartScreenProps)
               <div className="absolute inset-0 bg-gradient-to-r from-amber-400 to-purple-400 rounded-full blur-2xl opacity-60 animate-pulse"></div>
               <div className="relative">
                 <img
-                  src="/brain-icon.png"
+                  src={brainIcon}
                   alt="Brain Icon"
                   className="w-24 h-24 md:w-32 md:h-32 drop-shadow-2xl"
                 />
